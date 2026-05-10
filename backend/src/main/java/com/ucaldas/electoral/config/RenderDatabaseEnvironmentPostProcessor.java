@@ -14,6 +14,9 @@ import java.util.Map;
 /**
  * Render (y otros PaaS) inyectan {@code DATABASE_URL} como {@code postgres://user:pass@host/db}.
  * Convierte a propiedades estándar de Spring Boot para JDBC.
+ * <p>
+ * Si {@code DATABASE_URL} está definida, <strong>siempre</strong> tiene prioridad sobre
+ * {@code spring.datasource.*} del {@code application.yml} local (evita quedar en localhost:5432 en prod).
  */
 public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
@@ -26,14 +29,13 @@ public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostPr
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (environment.getProperty("SPRING_DATASOURCE_URL") != null) {
-            return;
-        }
-        if (environment.getProperty("spring.datasource.url") != null) {
-            return;
-        }
         String databaseUrl = environment.getProperty("DATABASE_URL");
         if (databaseUrl == null || databaseUrl.isBlank()) {
+            return;
+        }
+        // JDBC explícito por variable de entorno (sin parsear DATABASE_URL)
+        String springDsUrl = environment.getProperty("SPRING_DATASOURCE_URL");
+        if (springDsUrl != null && !springDsUrl.isBlank()) {
             return;
         }
         String normalized = databaseUrl.trim();

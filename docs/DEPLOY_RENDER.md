@@ -152,7 +152,19 @@ Si usás dominio propio para el front, agregalo en `CORS_ORIGIN_PATTERNS`.
 
 ---
 
-## 6. Error de build Docker: `pom.xml` o `/src` not found
+## 6. Error en runtime: `Connection to localhost:5432 refused`
+
+La API arrancó con el `application.yml` por defecto (Postgres en **localhost**) y **no** aplicó la URL de Render.
+
+1. En el **Web Service** de la API, en **Environment**, debe existir **`DATABASE_URL`** (Render la inyecta al **vincular** la base PostgreSQL al servicio, o pegá la *Internal Database URL* manualmente).
+2. Debe estar **`SPRING_PROFILES_ACTIVE=prod`**.
+3. Tras el arreglo en código, si `DATABASE_URL` está definida **tiene prioridad** sobre `spring.datasource` del `application.yml`. Volvé a desplegar la última versión del repo.
+
+Si usás solo **`SPRING_DATASOURCE_URL`** (JDBC completo), no hace falta `DATABASE_URL`.
+
+---
+
+## 7. Error de build Docker: `pom.xml` o `/src` not found
 
 Render envió al build un **contexto vacío o solo la carpeta `backend` sin archivos** cuando el `Dockerfile` esperaba otra estructura.
 
@@ -171,6 +183,6 @@ docker build -f Dockerfile.api -t electoral-api-test .
 
 ---
 
-## 7. `render.yaml` (opcional)
+## 8. `render.yaml` (opcional)
 
 En la raíz hay un `render.yaml` de ejemplo; ajustalo a tu cuenta o creá los recursos a mano.
