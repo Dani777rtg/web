@@ -1,0 +1,60 @@
+# Backend + datos en Docker (Postgres, Mailpit, API Spring Boot).
+# El frontend se ejecuta aparte: cd frontend && npm install && npm run dev → http://localhost:5173
+#
+# Levantar:  docker compose up --build --remove-orphans
+# Detener:   docker compose down
+# Borrar BD: docker compose down -v
+#
+# URLs:
+#   API:    http://localhost:${API_PORT:-8080}
+#   Mailpit: http://localhost:8025
+#   React:  http://localhost:5173 (npm run dev en carpeta frontend; ver docs/COMO_PROBAR.md)
+#
+# Variables (.env opcional):
+#   API_PORT   Puerto de la API en su máquina (default 8080)
+#   JWT_SECRET Secreto JWT (cambiar en producción)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: electoral
+      POSTGRES_USER: electoral
+      POSTGRES_PASSWORD: electoral
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U electoral -d electoral"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      JWT_SECRET: ${JWT_SECRET:-cambie-este-secreto-en-produccion-minimo-32-caracteres-xxx}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/public/processes/open"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+    restart: unless-stopped
+
+volumes:
+  pgdata:

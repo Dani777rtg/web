@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/electoral
+    username: electoral
+    password: electoral
+  mail:
+    host: mailpit
+    port: 1025
+  mvc:
+    servlet:
+      path: /
+
+server:
+  forward-headers-strategy: framework
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-docker-secret-min-32-chars-long-xxxx}

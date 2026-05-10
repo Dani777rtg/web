@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: electoral-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/electoral
+    username: electoral
+    password: electoral
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-change-in-production-min-256-bits-required-for-hs512-xxxxxxxx}
+    expiration-ms: 86400000
+  email:
+    allowed-domain-suffixes:
+      - "@ucaldas.edu.co"
+      - "@ucaldas.co"
+    # Dominios adicionales: cualquier correo cuyo dominio termine en .ucaldas.edu.co o .ucaldas.co se valida por regla
+    allow-ucaldas-subdomains: true
+  verification:
+    code-length: 6
+    ttl-minutes: 5
+    max-attempts: 5
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.ucaldas: INFO

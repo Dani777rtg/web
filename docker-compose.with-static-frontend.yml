@@ -1,0 +1,20 @@
+# OPCIONAL: además del compose principal, sirve el React compilado con Nginx.
+# La API sigue en http://localhost:${API_PORT:-8080}; la web estática en otro puerto.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.with-static-frontend.yml up --build
+#
+# Abrir la app: http://localhost:${STATIC_WEB_PORT:-3000}
+# (Nginx hace proxy de /api y /ws al contenedor api.)
+
+services:
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${STATIC_WEB_PORT:-3000}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
