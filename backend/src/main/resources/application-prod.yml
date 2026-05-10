@@ -1,5 +1,6 @@
 # Perfil activo en Render: SPRING_PROFILES_ACTIVE=prod
-# Postgres: enlace el servicio PostgreSQL de Render (inyecta DATABASE_URL) o defina spring.datasource.* a mano.
+# Postgres: vinculá la BD al Web Service para que exista DATABASE_URL, o defina SPRING_DATASOURCE_URL (+ user/pass).
+# No hay datasource por defecto en application.yml: sin DATABASE_URL este perfil no podrá conectar.
 
 spring:
   jpa:

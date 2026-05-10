@@ -1,10 +1,7 @@
 spring:
   application:
     name: electoral-api
-  datasource:
-    url: jdbc:postgresql://localhost:5432/electoral
-    username: electoral
-    password: electoral
+  # Datasource: perfil `docker` (compose), `local` (Postgres en tu PC) o `prod` (DATABASE_URL en Render).
   jpa:
     hibernate:
       ddl-auto: validate

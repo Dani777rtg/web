@@ -10,6 +10,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Render (y otros PaaS) inyectan {@code DATABASE_URL} como {@code postgres://user:pass@host/db}.
@@ -21,6 +23,7 @@ import java.util.Map;
 public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String SOURCE = "renderDatabaseUrl";
+    private static final Logger LOG = Logger.getLogger(RenderDatabaseEnvironmentPostProcessor.class.getName());
 
     @Override
     public int getOrder() {
@@ -73,8 +76,24 @@ public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostPr
             map.put("spring.datasource.username", user);
             map.put("spring.datasource.password", password);
             environment.getPropertySources().addFirst(new MapPropertySource(SOURCE, map));
-        } catch (Exception ignored) {
-            // Si falla el parseo, Spring intentará otras propiedades o fallará al arrancar con mensaje claro.
+            LOG.log(Level.INFO, "DATABASE_URL aplicada a spring.datasource (host={0}, db={1})", new Object[]{host, db});
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "No se pudo parsear DATABASE_URL; revise el formato (postgres://...)", e);
         }
+    }
+
+    private static void warnIfProdWithoutDatabaseUrl(ConfigurableEnvironment environment) {
+        String active = environment.getProperty("SPRING_PROFILES_ACTIVE");
+        if (active == null || !active.toLowerCase().contains("prod")) {
+            return;
+        }
+        String jdbc = environment.getProperty("SPRING_DATASOURCE_URL");
+        if (jdbc != null && !jdbc.isBlank()) {
+            return;
+        }
+        LOG.warning("""
+                Perfil prod sin DATABASE_URL ni SPRING_DATASOURCE_URL. \
+                En Render: Environment → vincular PostgreSQL al servicio (o pegar DATABASE_URL). \
+                Sin eso la API no puede arrancar.""");
     }
 }

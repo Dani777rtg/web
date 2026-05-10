@@ -1,0 +1,7 @@
+# Postgres local (sin Docker). Uso: SPRING_PROFILES_ACTIVE=local
+# O: mvn spring-boot:run -Dspring-boot.run.profiles=local
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/electoral
+    username: electoral
+    password: electoral

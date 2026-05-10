@@ -154,13 +154,19 @@ Si usás dominio propio para el front, agregalo en `CORS_ORIGIN_PATTERNS`.
 
 ## 6. Error en runtime: `Connection to localhost:5432 refused`
 
-La API arrancó con el `application.yml` por defecto (Postgres en **localhost**) y **no** aplicó la URL de Render.
+Suele significar que el servicio **no tiene `DATABASE_URL`** (o no está vinculada la base al Web Service). El `application.yml` **ya no** define Postgres en localhost para evitar eso en prod.
 
-1. En el **Web Service** de la API, en **Environment**, debe existir **`DATABASE_URL`** (Render la inyecta al **vincular** la base PostgreSQL al servicio, o pegá la *Internal Database URL* manualmente).
-2. Debe estar **`SPRING_PROFILES_ACTIVE=prod`**.
-3. Tras el arreglo en código, si `DATABASE_URL` está definida **tiene prioridad** sobre `spring.datasource` del `application.yml`. Volvé a desplegar la última versión del repo.
+1. En Render, abrí el **Web Service** de la API → **Environment**.
+2. Debe aparecer **`DATABASE_URL`** (valor largo `postgres://...`). Si no está:
+   - **Dashboard → tu PostgreSQL → Connect** (o pestaña equivalente) y **vinculá** esa base a este Web Service, **o**
+   - **Add environment variable** → tipo “from database” / enlace al recurso Postgres, **o**
+   - Pegá manualmente la **Internal Database URL** como variable `DATABASE_URL`.
+3. **`SPRING_PROFILES_ACTIVE`** = `prod` y **`JWT_SECRET`** definido.
+4. Guardá y **Manual Deploy** (o redeploy).
 
-Si usás solo **`SPRING_DATASOURCE_URL`** (JDBC completo), no hace falta `DATABASE_URL`.
+En los logs, si falta `DATABASE_URL` con perfil prod, verás un aviso explícito de `RenderDatabaseEnvironmentPostProcessor`.
+
+**Alternativa:** definí **`SPRING_DATASOURCE_URL`** con el JDBC completo (`jdbc:postgresql://...?sslmode=require`) más usuario y contraseña en variables que use Spring Boot.
 
 ---
 
