@@ -1,0 +1,38 @@
+# Blueprint de ejemplo para Render. Ajustá nombres y revisá la documentación actual de Render.
+# https://render.com/docs/blueprint-spec
+#
+# Tras crear la API, copiá su URL en VITE_API_ORIGIN del static site y volvé a desplegar el front.
+
+# Ajustá planes y nombres según tu cuenta Render. Si el blueprint falla, creá recursos a mano (ver docs/DEPLOY_RENDER.md).
+
+databases:
+  - name: electoral-db
+    databaseName: electoral
+    user: electoral
+
+services:
+  - type: web
+    name: electoral-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/public/processes/open
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: electoral-db
+          property: connectionString
+
+  - type: web
+    name: electoral-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_ORIGIN
+        sync: false

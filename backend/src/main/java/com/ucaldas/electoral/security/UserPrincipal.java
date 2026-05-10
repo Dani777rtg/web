@@ -54,6 +54,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isEmailVerificado() && user.isActivo();
+        return user.isActivo();
     }
 }

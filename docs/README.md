@@ -7,6 +7,7 @@
 | [PROYECTO.md](./PROYECTO.md) | Especificación funcional, requisitos, modelo de datos y decisiones de alcance. |
 | [COMO_PROBAR.md](./COMO_PROBAR.md) | Cómo levantar Docker + frontend, URLs, flujo de prueba y problemas frecuentes. |
 | [VERSIONAMIENTO.md](./VERSIONAMIENTO.md) | Uso de Git, ramas, etiquetas y registro de cambios (`CHANGELOG.md`). |
+| [DEPLOY_RENDER.md](./DEPLOY_RENDER.md) | Despliegue en Render: PostgreSQL, API, CORS y front estático. |
 
 ## Estructura del repositorio
 

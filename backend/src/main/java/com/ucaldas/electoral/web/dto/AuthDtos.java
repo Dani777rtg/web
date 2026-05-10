@@ -19,12 +19,6 @@ public final class AuthDtos {
     ) {
     }
 
-    public record VerifyRequest(
-            @NotBlank @Email String email,
-            @NotBlank String code
-    ) {
-    }
-
     public record LoginRequest(
             @NotBlank @Email String email,
             @NotBlank String password

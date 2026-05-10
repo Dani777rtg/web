@@ -15,6 +15,10 @@ public class ElectoralProcess {
     @Column(nullable = false)
     private String nombre;
 
+    /** Cargo o puesto al que aspiran los candidatos (ej. Representante estudiantil). */
+    @Column(nullable = false, length = 500)
+    private String puesto = "";
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AlcanceElectoral alcance;
@@ -61,6 +65,14 @@ public class ElectoralProcess {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getPuesto() {
+        return puesto;
+    }
+
+    public void setPuesto(String puesto) {
+        this.puesto = puesto;
     }
 
     public AlcanceElectoral getAlcance() {

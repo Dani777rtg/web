@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
-import api from '../api'
+import api, { setAuthToken } from '../api'
+import { API_BASE, getApiOrigin } from '../config'
 
 type Process = {
   id: number
   nombre: string
+  puesto?: string
   estado: string
   votosEmitidos?: number
 }
@@ -16,6 +18,8 @@ export default function Home() {
   const [apiState, setApiState] = useState<'loading' | 'ok' | 'error'>('loading')
 
   useEffect(() => {
+    const t = localStorage.getItem('token')
+    if (t) setAuthToken(t)
     api
       .get<Process[]>('/public/processes/open')
       .then((r) => {
@@ -27,9 +31,8 @@ export default function Home() {
 
   useEffect(() => {
     if (processes.length === 0) return
-    // En desarrollo, conectar directo a :8080 evita fallos del proxy con SockJS (varias peticiones HTTP).
-    const apiOrigin = import.meta.env.VITE_API_ORIGIN || 'http://127.0.0.1:8080'
-    const sockJsUrl = import.meta.env.DEV ? `${apiOrigin}/ws` : '/ws'
+    const apiOrigin = getApiOrigin()
+    const sockJsUrl = apiOrigin ? `${apiOrigin}/ws` : '/ws'
     const client = new Client({
       webSocketFactory: () => new SockJS(sockJsUrl) as unknown as WebSocket,
       reconnectDelay: 5000,
@@ -60,32 +63,25 @@ export default function Home() {
 
   if (apiState === 'loading') {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-ucal-primary">Bienvenida/o</h1>
-        <p className="rounded-lg border border-slate-200 bg-white p-4 text-slate-600">Cargando…</p>
+      <div>
+        <h1 className="page-title">Inicio</h1>
+        <p className="page-lead">Cargando procesos abiertos…</p>
       </div>
     )
   }
 
   if (apiState === 'error') {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-ucal-primary">Bienvenida/o</h1>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-900">
-          <p className="font-medium">No se pudo conectar con la API.</p>
-          <p className="mt-2 text-sm">
-            1) En la raíz del proyecto: <code className="rounded bg-white px-1">docker compose up --build</code> (API en el
-            puerto <code className="rounded bg-white px-1">API_PORT</code>, por defecto 8080). Espere a que <code className="rounded bg-white px-1">api</code> esté healthy.
-          </p>
-          <p className="mt-2 text-sm">
-            2) En otra terminal: <code className="rounded bg-white px-1">cd frontend</code> →{' '}
-            <code className="rounded bg-white px-1">npm install</code> →{' '}
-            <code className="rounded bg-white px-1">npm run dev</code> → abra{' '}
-            <strong>http://localhost:5173</strong>
-          </p>
-          <p className="mt-2 text-sm">
-            Si cambió el puerto de la API, copie <code className="rounded bg-white px-1">frontend/.env.example</code> a{' '}
-            <code className="rounded bg-white px-1">frontend/.env</code> y ajuste <code className="rounded bg-white px-1">VITE_API_ORIGIN</code>.
+      <div>
+        <h1 className="page-title">Inicio</h1>
+        <div className="panel relative mt-8 overflow-hidden px-6 py-6">
+          <span className="panel-accent-top bg-red-700/80" aria-hidden />
+          <p className="font-display text-lg text-stone-900">No hay conexión con la API</p>
+          <p className="mt-4 text-sm leading-relaxed text-ucal-muted">
+            Levante el backend con <code className="font-mono text-stone-800">docker compose up</code> en la raíz del
+            proyecto y el front con <code className="font-mono text-stone-800">npm run dev</code> en{' '}
+            <code className="font-mono text-stone-800">frontend</code>. Si cambió el puerto de la API, ajuste{' '}
+            <code className="font-mono text-stone-800">VITE_API_ORIGIN</code> en <code className="font-mono text-stone-800">frontend/.env</code>.
           </p>
         </div>
       </div>
@@ -93,38 +89,43 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-ucal-primary">Bienvenida/o</h1>
-      <p className="text-slate-600">
-        Consulta procesos con votación abierta. Los totales se actualizan en tiempo casi real mientras
-        dure la votación.
+    <div>
+      <h1 className="page-title">Votaciones abiertas</h1>
+      <p className="page-lead">
+        Votaciones abiertas que aplican para usted (si inicia sesión, también verá las de su facultad). Totales públicos
+        mientras la votación esté vigente.
       </p>
+
       {processes.length === 0 ? (
-        <p className="rounded-lg border border-slate-200 bg-white p-4 text-slate-500">
-          No hay votaciones abiertas en este momento. (La API responde bien; cuando un administrador abra una
-          votación, aparecerá aquí.)
-        </p>
+        <div className="panel relative mt-10 px-6 py-8">
+          <span className="panel-accent-top opacity-60" aria-hidden />
+          <p className="font-display text-lg text-stone-800">Ningún proceso en votación</p>
+          <p className="mt-2 text-sm text-ucal-muted">
+            Cuando un administrador abra una votación y usted pueda participar, aparecerá aquí. Las votaciones por facultad
+            requieren iniciar sesión con una cuenta de esa facultad.
+          </p>
+        </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="mt-10 space-y-6">
           {processes.map((p) => (
-            <li
-              key={p.id}
-              className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
-            >
-              <div className="font-medium">{p.nombre}</div>
-              <div className="mt-2 text-sm text-slate-600">
-                Votos emitidos:{' '}
-                <span className="font-mono text-lg font-semibold text-ucal-primary">
-                  {live[p.id] ?? '…'}
-                </span>
-              </div>
+            <li key={p.id} className="panel relative overflow-hidden pl-6 pr-6 pt-7 pb-6">
+              <span
+                className="absolute left-0 top-0 h-full w-1 bg-ucal-accent"
+                aria-hidden
+              />
+              <h2 className="font-display text-xl font-semibold text-ucal-primary">{p.nombre}</h2>
+              {p.puesto ? <p className="mt-1 text-sm text-ucal-muted">Puesto: {p.puesto}</p> : null}
+              <p className="mt-4 text-2xs font-medium uppercase tracking-[0.15em] text-ucal-muted">
+                Votos emitidos (público)
+              </p>
+              <p className="stat-num mt-1">{live[p.id] ?? '—'}</p>
               <a
-                className="mt-2 inline-block text-sm text-ucal-accent underline"
-                href={`/api/public/processes/${p.id}/report.csv`}
+                className="link-quiet mt-5 inline-block"
+                href={`${API_BASE}/public/processes/${p.id}/report.csv`}
                 target="_blank"
                 rel="noreferrer"
               >
-                Descargar reporte público (CSV)
+                Descargar CSV agregado →
               </a>
             </li>
           ))}

@@ -37,7 +37,8 @@ public class DataInitializer implements ApplicationRunner {
         if (appUserRepository.existsByEmailIgnoreCase("admin@ucaldas.edu.co")) {
             return;
         }
-        Faculty first = facultyRepository.findAll().stream().findFirst()
+        Faculty first = facultyRepository.findByNombre("Inteligencia Artificial e Ingenierías")
+                .or(() -> facultyRepository.findAll().stream().findFirst())
                 .orElseThrow(() -> new IllegalStateException("No hay facultades en BD. Revise migraciones."));
         AppUser admin = new AppUser();
         admin.setEmail("admin@ucaldas.edu.co");

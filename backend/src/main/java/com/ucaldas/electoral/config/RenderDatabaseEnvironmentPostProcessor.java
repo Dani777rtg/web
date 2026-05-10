@@ -1,0 +1,78 @@
+package com.ucaldas.electoral.config;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Render (y otros PaaS) inyectan {@code DATABASE_URL} como {@code postgres://user:pass@host/db}.
+ * Convierte a propiedades estándar de Spring Boot para JDBC.
+ */
+public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+
+    private static final String SOURCE = "renderDatabaseUrl";
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
+    }
+
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        if (environment.getProperty("SPRING_DATASOURCE_URL") != null) {
+            return;
+        }
+        if (environment.getProperty("spring.datasource.url") != null) {
+            return;
+        }
+        String databaseUrl = environment.getProperty("DATABASE_URL");
+        if (databaseUrl == null || databaseUrl.isBlank()) {
+            return;
+        }
+        String normalized = databaseUrl.trim();
+        if (!normalized.startsWith("postgres")) {
+            return;
+        }
+        try {
+            if (normalized.startsWith("postgres://")) {
+                normalized = "postgresql://" + normalized.substring("postgres://".length());
+            }
+            var uri = java.net.URI.create(normalized);
+            String userInfo = uri.getRawUserInfo();
+            if (userInfo == null) {
+                return;
+            }
+            int colon = userInfo.indexOf(':');
+            String user = URLDecoder.decode(
+                    colon > 0 ? userInfo.substring(0, colon) : userInfo, StandardCharsets.UTF_8);
+            String password = colon > 0
+                    ? URLDecoder.decode(userInfo.substring(colon + 1), StandardCharsets.UTF_8)
+                    : "";
+            String host = uri.getHost();
+            if (host == null) {
+                return;
+            }
+            int port = uri.getPort() > 0 ? uri.getPort() : 5432;
+            String path = uri.getPath();
+            if (path == null || path.length() < 2) {
+                return;
+            }
+            String db = path.substring(1).split("\\?")[0];
+            String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + "/" + db + "?sslmode=require";
+            Map<String, Object> map = new HashMap<>();
+            map.put("spring.datasource.url", jdbcUrl);
+            map.put("spring.datasource.username", user);
+            map.put("spring.datasource.password", password);
+            environment.getPropertySources().addFirst(new MapPropertySource(SOURCE, map));
+        } catch (Exception ignored) {
+            // Si falla el parseo, Spring intentará otras propiedades o fallará al arrancar con mensaje claro.
+        }
+    }
+}

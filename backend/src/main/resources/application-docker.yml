@@ -3,9 +3,6 @@ spring:
     url: jdbc:postgresql://postgres:5432/electoral
     username: electoral
     password: electoral
-  mail:
-    host: mailpit
-    port: 1025
   mvc:
     servlet:
       path: /

@@ -15,17 +15,6 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
-  mail:
-    host: ${MAIL_HOST:localhost}
-    port: ${MAIL_PORT:1025}
-    username: ""
-    password: ""
-    properties:
-      mail:
-        smtp:
-          auth: false
-          starttls:
-            enable: false
 
 app:
   jwt:
@@ -37,10 +26,6 @@ app:
       - "@ucaldas.co"
     # Dominios adicionales: cualquier correo cuyo dominio termine en .ucaldas.edu.co o .ucaldas.co se valida por regla
     allow-ucaldas-subdomains: true
-  verification:
-    code-length: 6
-    ttl-minutes: 5
-    max-attempts: 5
 
 server:
   port: 8080

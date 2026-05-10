@@ -1,5 +1,4 @@
-# Backend + datos en Docker (Postgres, Mailpit, API Spring Boot).
-# El frontend se ejecuta aparte: cd frontend && npm install && npm run dev → http://localhost:5173
+# Backend + Postgres en Docker. El frontend: cd frontend && npm install && npm run dev → http://localhost:5173
 #
 # Levantar:  docker compose up --build --remove-orphans
 # Detener:   docker compose down
@@ -7,8 +6,7 @@
 #
 # URLs:
 #   API:    http://localhost:${API_PORT:-8080}
-#   Mailpit: http://localhost:8025
-#   React:  http://localhost:5173 (npm run dev en carpeta frontend; ver docs/COMO_PROBAR.md)
+#   React:  http://localhost:5173 (ver docs/COMO_PROBAR.md)
 #
 # Variables (.env opcional):
 #   API_PORT   Puerto de la API en su máquina (default 8080)
@@ -29,11 +27,6 @@ services:
       timeout: 5s
       retries: 12
 
-  mailpit:
-    image: axllent/mailpit:latest
-    ports:
-      - "8025:8025"
-
   api:
     build:
       context: ./backend
@@ -46,8 +39,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      mailpit:
-        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/public/processes/open"]
       interval: 10s

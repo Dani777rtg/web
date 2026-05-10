@@ -37,9 +37,9 @@ Diseñar y desarrollar una plataforma web para la inscripción, administración 
 
 El sistema permitirá:
 
-- **Registro de usuarios** con correo institucional validado mediante **código de verificación** enviado al correo (ver sección 11).
+- **Registro de usuarios** con correo institucional cuyo dominio cumple las reglas configuradas (lista blanca; ver sección 11). *Implementación actual:* alta inmediata sin código por correo.
 - En el registro, el usuario **elige la facultad a la que pertenece** (entre las facultades dadas de alta por el administrador).
-- Preregistro / alta de votantes (mismo flujo de verificación por correo según se implemente como una o dos pantallas).
+- Preregistro / alta de votantes (un solo paso en la implementación actual).
 - **Administración de facultades** por parte del administrador (crear, editar, consultar, eliminar). La lista inicial del documento es referencia; el catálogo vivo lo define el admin.
 - Administración de cuerpos colegiados.
 - **Convocatoria de votaciones y planchas** por el administrador: el admin crea el proceso o votación y **asigna como candidatos a usuarios del sistema** (no se descarta complementar con datos de plancha según reglas académicas).
@@ -263,22 +263,21 @@ Se aceptarán direcciones cuyo dominio sea una **variante institucional de Calda
 
 La implementación concreta será una **lista blanca configurable** (propiedad de aplicación o tabla de dominios permitidos) para no hardcodear y poder añadir dominios sin redeploy.
 
-### Verificación del titular del correo
+### Verificación del titular del correo (especificación original vs implementación)
 
-1. El usuario solicita registro con su correo institucional.
-2. El sistema genera un **código de verificación** (alfanumérico de longitud razonable; p. ej. 6–8 caracteres) con **caducidad de 5 minutos** desde su generación.
-3. El código se envía al **mismo correo** indicado.
-4. El usuario ingresa el código en la aplicación.
-5. Tras validar el código, la cuenta queda **verificada y activa** (o el siguiente paso según flujo).
+**Especificación original:** código enviado al correo con caducidad y validación en pantalla.
+
+**Implementación actual:** se confía en la **validación del dominio** del correo (institucional permitido). Tras enviar el formulario de registro, la cuenta queda activa y el usuario recibe un **JWT** (sin paso de código por correo). Esto simplifica despliegue y demos; si en el futuro se exige prueba de titularidad, se puede reintroducir el flujo por correo u otro factor.
+
+**Demo académica:** los datos viven en una **base dedicada al proyecto** (Docker/Render), no en la base corporativa de la universidad. La vinculación con identidad o matrícula oficial queda **fuera de alcance** hasta que exista acceso acordado a APIs o directorios institucionales.
 
 ### Validaciones adicionales
 
 - No se permitirán registros duplicados (correo y/o código institucional únicos en base de datos).
-- Sin verificación de correo, no se completa el registro o no se permite iniciar sesión (según política unificada).
 
-### Pendiente de parametrizar
+### Pendiente de parametrizar (si se vuelve a correo transaccional)
 
-- Proveedor SMTP o servicio de correo, plantillas HTML, reenvío de código y límite de intentos.
+- Proveedor SMTP, plantillas y política de intentos.
 
 ---
 
@@ -667,7 +666,7 @@ Objetivo: cuando haya **muchos usuarios concurrentes**, poder ejecutar **varias 
    Build de React → archivos estáticos servidos por Nginx (recomendado en producción).
 
 3. **Docker Compose de desarrollo**  
-   Servicios: `postgres`, `api`, `nginx` (y opcional `mailpit` o similar para probar correos). Variables de entorno para URL de BD y secretos JWT.
+   Servicios: `postgres`, `api`, `nginx` (según el repo). Variables de entorno para URL de BD y secretos JWT.
 
 4. **API stateless respecto al balanceo**  
    Si usas **JWT sin sesión en servidor**, cualquier réplica puede validar el token. Si usas sesiones en memoria, con varias réplicas falla: entonces **Redis** como almacén de sesiones o solo JWT.

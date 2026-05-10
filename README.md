@@ -4,7 +4,7 @@ Monorepo con **API Spring Boot**, **React (Vite)** y **PostgreSQL**. Despliegue 
 
 ## Inicio rápido
 
-1. **Backend + BD + correo (Docker)**  
+1. **Backend + BD (Docker)**  
    ```bash
    docker compose up --build --remove-orphans
    ```
@@ -21,6 +21,7 @@ Monorepo con **API Spring Boot**, **React (Vite)** y **PostgreSQL**. Despliegue 
 | Especificación del proyecto | [docs/PROYECTO.md](./docs/PROYECTO.md) |
 | Cómo probar y URLs | [docs/COMO_PROBAR.md](./docs/COMO_PROBAR.md) |
 | Git, ramas y versiones | [docs/VERSIONAMIENTO.md](./docs/VERSIONAMIENTO.md) |
+| Despliegue en Render | [docs/DEPLOY_RENDER.md](./docs/DEPLOY_RENDER.md) |
 | Historial de versiones | [CHANGELOG.md](./CHANGELOG.md) |
 
 Versión declarada: **`VERSION`** (raíz) y `CHANGELOG.md`.

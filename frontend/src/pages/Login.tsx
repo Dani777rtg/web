@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api, { setAuthToken } from '../api'
+import api, { notifyAuthSessionChanged, setAuthToken } from '../api'
 
 export default function Login() {
   const nav = useNavigate()
@@ -16,39 +16,49 @@ export default function Login() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('rol', data.rol)
       setAuthToken(data.token)
+      notifyAuthSessionChanged()
       nav('/')
     } catch {
-      setErr('Credenciales inválidas o correo no verificado.')
+      setErr('Correo o contraseña incorrectos.')
     }
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-md space-y-4 rounded-xl border bg-white p-6 shadow">
-      <h1 className="text-xl font-bold text-ucal-primary">Ingresar</h1>
-      {err && <p className="text-sm text-red-600">{err}</p>}
-      <label className="block text-sm">
-        Correo institucional
-        <input
-          className="mt-1 w-full rounded border px-3 py-2"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </label>
-      <label className="block text-sm">
-        Contraseña
-        <input
-          className="mt-1 w-full rounded border px-3 py-2"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </label>
-      <button type="submit" className="w-full rounded bg-ucal-primary py-2 font-medium text-white">
-        Entrar
-      </button>
-    </form>
+    <div className="mx-auto max-w-md">
+      <h1 className="page-title">Ingresar</h1>
+      <p className="page-lead">Acceso con el correo y la clave registrados en este sistema.</p>
+
+      <form onSubmit={submit} className="panel relative mt-8 overflow-hidden px-6 pb-7 pt-8">
+        <span className="panel-accent-top" aria-hidden />
+        {err && (
+          <p className="mb-4 border-l-2 border-red-600/70 bg-red-50/80 py-2 pl-3 text-sm text-red-900">{err}</p>
+        )}
+        <label className="field-label">
+          Correo institucional
+          <input
+            className="field-input"
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
+        <label className="field-label mt-6">
+          Contraseña
+          <input
+            className="field-input"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
+        <button type="submit" className="btn-primary mt-10">
+          Entrar
+        </button>
+      </form>
+    </div>
   )
 }

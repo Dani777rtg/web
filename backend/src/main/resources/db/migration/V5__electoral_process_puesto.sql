@@ -1,0 +1,2 @@
+ALTER TABLE electoral_processes
+    ADD COLUMN IF NOT EXISTS puesto VARCHAR(500) NOT NULL DEFAULT '';

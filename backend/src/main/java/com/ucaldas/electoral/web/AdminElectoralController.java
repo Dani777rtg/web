@@ -39,10 +39,28 @@ public class AdminElectoralController {
         return electoralAdminService.createProcess(req);
     }
 
+    @PostMapping("/elections")
+    @Transactional
+    public ProcessDtos.ProcessResponse createElection(@Valid @RequestBody ProcessDtos.CreateElectionRequest req) {
+        if (req.alcance() == AlcanceElectoral.FACULTAD && req.facultadId() == null) {
+            throw new IllegalArgumentException("facultadId es obligatorio para alcance FACULTAD.");
+        }
+        return electoralAdminService.createElection(req);
+    }
+
     @PatchMapping("/processes/{id}/estado")
     @Transactional
     public ProcessDtos.ProcessResponse estado(@PathVariable Long id, @RequestParam EstadoProceso estado) {
         return electoralAdminService.updateProcessState(id, estado);
+    }
+
+    @PostMapping("/processes/{procesoId}/candidatos")
+    @Transactional
+    public List<PlanchaDtos.PlanchaResponse> registrarCandidatos(
+            @PathVariable Long procesoId,
+            @Valid @RequestBody ProcessDtos.AddCandidatesRequest req
+    ) {
+        return electoralAdminService.addCandidatesFromUsers(procesoId, req.userIds());
     }
 
     @GetMapping("/processes")
@@ -50,6 +68,7 @@ public class AdminElectoralController {
         return processRepository.findAll().stream().map(p -> new ProcessDtos.ProcessResponse(
                 p.getId(),
                 p.getNombre(),
+                p.getPuesto() != null ? p.getPuesto() : "",
                 p.getAlcance(),
                 p.getFacultad() != null ? p.getFacultad().getId() : null,
                 p.getCollegialBody() != null ? p.getCollegialBody().getId() : null,

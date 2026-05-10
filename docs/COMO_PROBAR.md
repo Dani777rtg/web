@@ -2,6 +2,10 @@
 
 El **backend y la base de datos** corren en **Docker**. El **frontend (React)** corre en su máquina con **Vite** (`npm run dev`) para desarrollo con recarga rápida.
 
+### Alcance del demo (seguridad e identidad)
+
+Este proyecto usa una **base PostgreSQL propia** (local o en Render), **no** la base de datos corporativa ni el directorio de cuentas de la universidad. El registro valida **formato de correo** institucional permitido; **no** comprueba contra sistemas centrales. Integrar LDAP, API de matrícula o identidad institucional queda como **línea futura** si la universidad facilita acceso.
+
 ## 1. Requisitos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (o Docker Engine + Compose v2).
@@ -41,7 +45,8 @@ Si la API no está en el puerto **8080**, cree `frontend/.env` a partir de `fron
 |-----|-----|
 | **Aplicación (React)** | http://localhost:5173 |
 | **API (JSON directo)** | http://localhost:8080 u otro (variable `API_PORT` en `.env` de la raíz) |
-| **Mailpit (códigos de correo)** | http://localhost:8025 |
+
+**Registro:** el sistema valida que el correo sea de un **dominio institucional permitido** (`@ucaldas.edu.co`, subdominios, etc., según configuración). No se envía código por correo: al registrarse, la cuenta queda activa y la sesión inicia de inmediato.
 
 Ejemplo de comprobación de API:  
 `http://localhost:PUERTO/api/public/processes/open` (mismo `API_PORT` que en `.env`) — debe devolver `[]` o una lista JSON.
@@ -50,25 +55,26 @@ Ejemplo de comprobación de API:
 
 ### 5.1 Ingresar como administrador
 
+El backend crea este usuario **la primera vez que arranca** la API, si aún no existe nadie con ese correo (ver `DataInitializer`). En los logs del contenedor `api` debería aparecer: `Usuario admin creado: admin@ucaldas.edu.co / Admin123!`.
+
 1. En **http://localhost:5173**, **Ingresar** con:
    - **Correo:** `admin@ucaldas.edu.co`
    - **Contraseña:** `Admin123!`
 
 ### 5.2 Registrar votantes
 
-1. **Registro** con correo `@ucaldas.edu.co`, etc.
-2. Código en **http://localhost:8025**
-3. Verificar y repetir con un segundo usuario.
+1. **Registro** con correo institucional permitido y datos completos → **Crear cuenta e ingresar**.
+2. Repetir con un segundo usuario si hace falta para pruebas de votación.
 
-### 5.3 Proceso y plancha (admin)
+### 5.3 Crear votación (admin, un solo formulario)
 
-1. **Admin** → crear proceso (fechas que incluyan la hora actual) → **Abrir votación**.
-2. **Actualizar lista** de usuarios y crear **plancha** con IDs de principal/suplente.
+1. **Admin** → **Nueva votación**: nombre, **puesto** al que se aspira, alcance (**universidad** o **facultad**), **fecha y hora de cierre**, y marque uno o más **candidatos** (usuarios `USER`). Pulse **Crear votación** (queda en borrador con el periodo iniciado en ese momento).
+2. En **Votaciones creadas**, pulse **Abrir votación** para que aparezca en **Inicio** y **Votar** a quien corresponda (facultad: solo esa facultad; universidad: todos).
 
 ### 5.4 Votar e indicadores
 
-1. Salir e iniciar sesión como votante → **Votar**.
-2. **Inicio** muestra procesos abiertos y contador en tiempo casi real.
+1. Inicie sesión como votante → **Votar** → elija la votación y **una opción** (un voto por persona y por votación).
+2. **Inicio** lista votaciones abiertas **vigentes** (entre inicio y cierre) visibles para usted. Sin iniciar sesión solo verá las de toda la universidad; con sesión también las de su facultad.
 
 ### 5.5 Reportes
 
@@ -79,7 +85,7 @@ Ejemplo de comprobación de API:
 
 ### 5.6 Cerrar votación
 
-En **Admin**, **Cerrar** en el proceso.
+En **Admin**, **Cerrar** en la votación.
 
 ## 6. Opcional: todo el front en Docker (sin Node en el PC)
 
@@ -112,11 +118,10 @@ docker compose down -v
 |---------|-----------|
 | Front no conecta | Compruebe `docker compose ps` y que `api` esté **healthy**; pruebe la URL de la API en el navegador. |
 | **Bind for 0.0.0.0:8080 failed** | Algo ya usa el 8080. En la raíz, en `.env`, ponga `API_PORT=8081` (u otro puerto libre). Cree `frontend/.env` con la misma URL: `VITE_API_ORIGIN=http://127.0.0.1:8081`. Reinicie `docker compose` y `npm run dev`. |
-| No llega el código | Revise Mailpit en **:8025** y logs del contenedor `api`. |
+| **admin@ucaldas.edu.co** no entra o no es admin | Si ya se **registró** ese correo por la pantalla de registro, quedó como usuario normal y el arranque **no** lo promueve. Use otro admin (actualice `rol` en BD a `ADMIN`) o borre ese usuario / volumen de Postgres (`docker compose down -v`) y vuelva a levantar para que se cree el admin por defecto. |
 
 ## 9. Producción (resumen)
 
 - `JWT_SECRET` seguro y único.
 - HTTPS delante de la API y/o del front estático.
-- SMTP real en lugar de Mailpit (`spring.mail.*` en el servicio `api`).
 - No exponga Postgres al público.

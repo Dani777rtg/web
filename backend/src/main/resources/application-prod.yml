@@ -1,0 +1,35 @@
+# Perfil activo en Render: SPRING_PROFILES_ACTIVE=prod
+# Postgres: enlace el servicio PostgreSQL de Render (inyecta DATABASE_URL) o defina spring.datasource.* a mano.
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000
+  email:
+    allowed-domain-suffixes:
+      - "@ucaldas.edu.co"
+      - "@ucaldas.co"
+    allow-ucaldas-subdomains: true
+  cors:
+    allowed-origin-patterns: ${CORS_ORIGIN_PATTERNS:https://*.onrender.com,http://localhost:*,http://127.0.0.1:*}
+
+logging:
+  level:
+    root: INFO
+    com.ucaldas: INFO
