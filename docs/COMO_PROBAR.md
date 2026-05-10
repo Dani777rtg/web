@@ -23,7 +23,9 @@ docker compose up --build --remove-orphans
 
 Espere a que el contenedor **`api`** pase a estado **healthy** (puede tardar 1–2 min la primera vez).
 
-Opcional: copie `.env.example` a `.env` y ajuste `API_PORT` o `JWT_SECRET`.
+Opcional: copie `.env.example` a `.env` y ajuste `API_PORT`, `POSTGRES_PORT` o `JWT_SECRET`.
+
+**Conectar un gestor (pgAdmin, DBeaver)** a Postgres del contenedor: con el stack levantado, use host `127.0.0.1`, puerto el de `POSTGRES_PORT` (por defecto **5432**), base `electoral`, usuario `electoral`, contraseña `electoral`. Si el puerto 5432 ya lo usa otro programa en su PC, ponga en `.env` por ejemplo `POSTGRES_PORT=5433` y reinicie `docker compose`.
 
 ## 3. Levantar el frontend (Vite)
 

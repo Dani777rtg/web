@@ -1,0 +1,4 @@
+# Solo afecta builds con contexto en la raíz (Dockerfile.api).
+.git
+frontend/node_modules
+**/.DS_Store

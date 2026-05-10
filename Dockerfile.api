@@ -1,7 +1,10 @@
+# Build desde la raíz del repo (contexto "."). Así Render y otros PaaS encuentran backend/pom.xml y backend/src.
+# Ver docker-compose.yml y docs/DEPLOY_RENDER.md.
+
 FROM maven:3.9-eclipse-temurin-17-alpine AS build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+COPY backend/pom.xml .
+COPY backend/src ./src
 RUN mvn -q -DskipTests package
 
 FROM eclipse-temurin:17-jre-alpine

@@ -9,8 +9,9 @@
 #   React:  http://localhost:5173 (ver docs/COMO_PROBAR.md)
 #
 # Variables (.env opcional):
-#   API_PORT   Puerto de la API en su máquina (default 8080)
-#   JWT_SECRET Secreto JWT (cambiar en producción)
+#   API_PORT        Puerto de la API en su máquina (default 8080)
+#   POSTGRES_PORT   Puerto de Postgres en su máquina para pgAdmin/DBeaver (default 5432)
+#   JWT_SECRET      Secreto JWT (cambiar en producción)
 
 services:
   postgres:
@@ -19,6 +20,8 @@ services:
       POSTGRES_DB: electoral
       POSTGRES_USER: electoral
       POSTGRES_PASSWORD: electoral
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -29,8 +32,8 @@ services:
 
   api:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.api
     ports:
       - "${API_PORT:-8080}:8080"
     environment:

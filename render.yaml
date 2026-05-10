@@ -14,8 +14,9 @@ services:
   - type: web
     name: electoral-api
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    # Contexto = raíz del repo (Render a veces usa solo "."); el Dockerfile copia desde backend/
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: ./
     healthCheckPath: /api/public/processes/open
     envVars:
       - key: SPRING_PROFILES_ACTIVE
