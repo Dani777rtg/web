@@ -164,7 +164,7 @@ Suele significar que el servicio **no tiene `DATABASE_URL`** (o no está vincula
 3. **`SPRING_PROFILES_ACTIVE`** = `prod` y **`JWT_SECRET`** definido.
 4. Guardá y **Manual Deploy** (o redeploy).
 
-En los logs, si falta `DATABASE_URL` con perfil prod, verás un aviso explícito de `RenderDatabaseEnvironmentPostProcessor`.
+En prod, la conexión se arma con `RenderPostgresDataSourceConfiguration` (lee `DATABASE_URL` o `spring.datasource.url`).
 
 **Alternativa:** definí **`SPRING_DATASOURCE_URL`** con el JDBC completo (`jdbc:postgresql://...?sslmode=require`) más usuario y contraseña en variables que use Spring Boot.
 
