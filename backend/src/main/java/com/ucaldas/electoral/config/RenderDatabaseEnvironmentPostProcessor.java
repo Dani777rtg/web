@@ -32,18 +32,21 @@ public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostPr
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        if (explicitSpringDatasourceUrl(environment)) {
+            return;
+        }
+
         String databaseUrl = environment.getProperty("DATABASE_URL");
         if (databaseUrl == null || databaseUrl.isBlank()) {
+            failIfProdWithoutDatabaseConfig(environment);
             return;
         }
-        // JDBC explícito por variable de entorno (sin parsear DATABASE_URL)
-        String springDsUrl = environment.getProperty("SPRING_DATASOURCE_URL");
-        if (springDsUrl != null && !springDsUrl.isBlank()) {
-            return;
-        }
+
         String normalized = databaseUrl.trim();
         if (!normalized.startsWith("postgres")) {
-            return;
+            throw new IllegalStateException(
+                    "DATABASE_URL no reconocida (debe empezar por postgres:// o postgresql://). Valor recibido (recortado): "
+                            + preview(normalized));
         }
         try {
             if (normalized.startsWith("postgres://")) {
@@ -51,8 +54,8 @@ public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostPr
             }
             var uri = java.net.URI.create(normalized);
             String userInfo = uri.getRawUserInfo();
-            if (userInfo == null) {
-                return;
+            if (userInfo == null || userInfo.isBlank()) {
+                throw new IllegalStateException("DATABASE_URL sin usuario/contraseña en la URL.");
             }
             int colon = userInfo.indexOf(':');
             String user = URLDecoder.decode(
@@ -61,15 +64,18 @@ public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostPr
                     ? URLDecoder.decode(userInfo.substring(colon + 1), StandardCharsets.UTF_8)
                     : "";
             String host = uri.getHost();
-            if (host == null) {
-                return;
+            if (host == null || host.isBlank()) {
+                throw new IllegalStateException("DATABASE_URL sin host.");
             }
             int port = uri.getPort() > 0 ? uri.getPort() : 5432;
             String path = uri.getPath();
             if (path == null || path.length() < 2) {
-                return;
+                throw new IllegalStateException("DATABASE_URL sin nombre de base en el path.");
             }
             String db = path.substring(1).split("\\?")[0];
+            if (db.isBlank()) {
+                throw new IllegalStateException("DATABASE_URL con nombre de base vacío.");
+            }
             String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + "/" + db + "?sslmode=require";
             Map<String, Object> map = new HashMap<>();
             map.put("spring.datasource.url", jdbcUrl);
@@ -77,23 +83,41 @@ public class RenderDatabaseEnvironmentPostProcessor implements EnvironmentPostPr
             map.put("spring.datasource.password", password);
             environment.getPropertySources().addFirst(new MapPropertySource(SOURCE, map));
             LOG.log(Level.INFO, "DATABASE_URL aplicada a spring.datasource (host={0}, db={1})", new Object[]{host, db});
+        } catch (IllegalStateException e) {
+            throw e;
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "No se pudo parsear DATABASE_URL; revise el formato (postgres://...)", e);
+            throw new IllegalStateException(
+                    "No se pudo convertir DATABASE_URL a JDBC. Revise la URL en Render (Internal). Detalle: " + e.getMessage(),
+                    e);
         }
     }
 
-    private static void warnIfProdWithoutDatabaseUrl(ConfigurableEnvironment environment) {
+    private static boolean explicitSpringDatasourceUrl(ConfigurableEnvironment environment) {
+        String springDsUrl = environment.getProperty("SPRING_DATASOURCE_URL");
+        return springDsUrl != null && !springDsUrl.isBlank();
+    }
+
+    private static void failIfProdWithoutDatabaseConfig(ConfigurableEnvironment environment) {
+        if (!isProdProfile(environment)) {
+            return;
+        }
+        if (explicitSpringDatasourceUrl(environment)) {
+            return;
+        }
+        throw new IllegalStateException("""
+                Perfil prod sin conexión a Postgres: falta DATABASE_URL (vinculá PostgreSQL al Web Service en Render) \
+                o defina SPRING_DATASOURCE_URL con el jdbc:postgresql://...""");
+    }
+
+    private static boolean isProdProfile(ConfigurableEnvironment environment) {
         String active = environment.getProperty("SPRING_PROFILES_ACTIVE");
-        if (active == null || !active.toLowerCase().contains("prod")) {
-            return;
+        return active != null && active.toLowerCase().contains("prod");
+    }
+
+    private static String preview(String s) {
+        if (s.length() <= 80) {
+            return s;
         }
-        String jdbc = environment.getProperty("SPRING_DATASOURCE_URL");
-        if (jdbc != null && !jdbc.isBlank()) {
-            return;
-        }
-        LOG.warning("""
-                Perfil prod sin DATABASE_URL ni SPRING_DATASOURCE_URL. \
-                En Render: Environment → vincular PostgreSQL al servicio (o pegar DATABASE_URL). \
-                Sin eso la API no puede arrancar.""");
+        return s.substring(0, 80) + "...";
     }
 }
