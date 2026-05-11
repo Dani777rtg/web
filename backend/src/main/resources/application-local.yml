@@ -5,3 +5,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/electoral
     username: electoral
     password: electoral
+
+app:
+  demo-seed:
+    enabled: ${DEMO_SEED_ENABLED:true}

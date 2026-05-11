@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ElectoralProcessRepository extends JpaRepository<ElectoralProcess, Long> {
     List<ElectoralProcess> findByEstado(EstadoProceso estado);
+
+    boolean existsByNombre(String nombre);
 }

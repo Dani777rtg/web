@@ -13,3 +13,6 @@ server:
 app:
   jwt:
     secret: ${JWT_SECRET:dev-docker-secret-min-32-chars-long-xxxx}
+  # 30 usuarios + 2 votaciones demo (ver docs/CUENTAS_DEMO_VOTACIONES.md). Desactive con DEMO_SEED_ENABLED=false
+  demo-seed:
+    enabled: ${DEMO_SEED_ENABLED:true}
