@@ -21,7 +21,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 border-b-2 border-ucal-primary/20 bg-paper-card/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b-2 border-ucal-primary/35 bg-paper-card/95 shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl flex-wrap items-end justify-between gap-4 px-4 py-5 md:max-w-4xl">
           <div>
             <p className="text-2xs font-medium uppercase tracking-[0.2em] text-ucal-muted">Universidad de Caldas</p>
