@@ -168,7 +168,7 @@ export default function Admin() {
           y podrán votar; <strong className="font-medium text-stone-800">universidad</strong>: aplica a todos.
         </p>
         {log && (
-          <p className="mt-4 border-l-2 border-amber-700/50 bg-amber-50/90 py-2 pl-3 text-sm text-amber-950">{log}</p>
+          <p className="mt-4 border-l-2 border-ucal-accent/50 bg-sky-50/90 py-2 pl-3 text-sm text-slate-800">{log}</p>
         )}
       </div>
 

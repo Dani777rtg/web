@@ -29,7 +29,7 @@ export default function App() {
               Procesos electorales
             </Link>
           </div>
-          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-stone-700">
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-slate-700">
             <Link to="/" className="hover:text-ucal-primary">
               Inicio
             </Link>
@@ -55,7 +55,7 @@ export default function App() {
                 )}
                 <button
                   type="button"
-                  className="text-stone-500 hover:text-ucal-primary"
+                  className="text-slate-500 hover:text-ucal-primary"
                   onClick={() => {
                     localStorage.removeItem('token')
                     localStorage.removeItem('rol')
@@ -83,7 +83,7 @@ export default function App() {
           />
         </Routes>
       </main>
-      <footer className="border-t border-stone-300/50 py-8 text-center text-2xs text-stone-500">
+      <footer className="border-t border-slate-300/60 py-8 text-center text-2xs text-slate-500">
         Prototipo académico · datos en base propia del proyecto
       </footer>
     </div>

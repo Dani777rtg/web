@@ -5,14 +5,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Paleta inspirada en identidad institucional (azul académico, acentos fríos).
         ucal: {
-          primary: '#0c2d48',
-          accent: '#9a7b0f',
-          muted: '#5c6670',
+          primary: '#003b7a',
+          'primary-hover': '#002d5e',
+          accent: '#1a6fa8',
+          'accent-soft': '#3d8cc9',
+          muted: '#4a5f73',
         },
-        // Nombres planos: con objetos anidados + DEFAULT, @apply bg-paper a veces falla en PostCSS.
-        paper: '#f3f0ea',
-        'paper-card': '#faf8f4',
+        paper: '#f2f6fb',
+        'paper-card': '#fbfcfe',
       },
       fontFamily: {
         display: ['"Literata"', 'Georgia', 'serif'],
@@ -22,7 +24,7 @@ export default {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],
       },
       boxShadow: {
-        line: 'inset 0 -1px 0 0 rgba(12, 45, 72, 0.12)',
+        line: 'inset 0 -1px 0 0 rgba(0, 59, 122, 0.14)',
       },
     },
   },
