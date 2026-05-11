@@ -37,9 +37,10 @@ Hacelo en este orden: **Postgres → API → Static Site (front)**. Tu código y
    - `SPRING_PROFILES_ACTIVE` = `prod`
    - `JWT_SECRET` = una cadena **larga y aleatoria** (32+ caracteres). Podés generarla en Render con “Generate” si existe, o en tu PC.
    - Vinculá la base: **Add environment variable → from database** (o el flujo que Render muestre) y elegí la Postgres que creaste. Eso inyecta **`DATABASE_URL`**; el backend la convierte solo a JDBC con SSL.
+   - **Datos demo (votaciones + 30 usuarios):** en producción el seed viene **apagado** por seguridad. Si querés las cuentas `demo-voto-*@ucaldas.edu.co` y las dos votaciones de prueba en esta API de Render, agregá **`DEMO_SEED_ENABLED`** = **`true`**, guardá y hacé un **nuevo deploy**. La primera vez que arranque con eso (y sin proceso demo previo en la BD), se insertan los datos; después es idempotente. Contraseña y correos: [CUENTAS_DEMO_VOTACIONES.md](CUENTAS_DEMO_VOTACIONES.md). Para un entorno real de votación, dejá esta variable sin definir o en `false`.
 6. Opcional: si más adelante usás un dominio propio para el front, agregá `CORS_ORIGIN_PATTERNS` con patrones separados por coma (por defecto ya incluye `https://*.onrender.com`).
 7. **Create Web Service** y esperá el primer deploy. La URL será algo como `https://electoral-api-xxxx.onrender.com`.
-8. **Probar:** en el navegador abrí `https://TU-API.onrender.com/api/public/processes/open` — debería responder `[]` o JSON (la primera vez el arranque puede tardar un poco).
+8. **Probar:** en el navegador abrí `https://TU-API.onrender.com/api/public/processes/open` — debería responder JSON (vacío `[]` si no activaste el demo seed, o procesos abiertos si usás `DEMO_SEED_ENABLED=true`). La primera vez el arranque puede tardar un poco.
 
 **Nota:** En plan gratuito el servicio web puede “dormir” tras inactividad; el primer request después puede tardar ~1 minuto (cold start).
 
@@ -75,7 +76,7 @@ En la raíz del repo hay un `render.yaml` de ejemplo. **New → Blueprint** y co
 2. **Web Service** con `Dockerfile.api` en la raíz del repo (API Spring Boot).
 3. **Static Site** (opcional) para el React: al construir definí `VITE_API_ORIGIN` con la URL pública de la API.
 
-Variables mínimas del servicio API: `SPRING_PROFILES_ACTIVE=prod`, `JWT_SECRET` (largo y aleatorio), y base de datos vinculada (`DATABASE_URL` o equivalente).
+Variables mínimas del servicio API: `SPRING_PROFILES_ACTIVE=prod`, `JWT_SECRET` (largo y aleatorio), y base de datos vinculada (`DATABASE_URL` o equivalente). Opcional para pruebas: `DEMO_SEED_ENABLED=true` (ver arriba).
 
 ---
 

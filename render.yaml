@@ -27,6 +27,9 @@ services:
         fromDatabase:
           name: electoral-db
           property: connectionString
+      # Opcional: descomentá para insertar 30 usuarios demo y 2 votaciones al arranque (ver docs/CUENTAS_DEMO_VOTACIONES.md).
+      # - key: DEMO_SEED_ENABLED
+      #   value: "true"
 
   - type: web
     name: electoral-web

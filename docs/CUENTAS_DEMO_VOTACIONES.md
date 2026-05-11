@@ -1,6 +1,11 @@
 # Cuentas demo para pruebas de votación
 
-Se crean automáticamente al levantar la API con **Docker** o perfil **`local`**, si `app.demo-seed.enabled` es `true` (por defecto en `application-docker.yml` y `application-local.yml`). En **producción** (`prod`) el seed está **desactivado** salvo que defina `DEMO_SEED_ENABLED=true` (no recomendado en un entorno real).
+Se crean al arranque de la API cuando `app.demo-seed.enabled` es `true`:
+
+- **Docker / local:** suele venir activado por defecto (`application-docker.yml`, `application-local.yml`).
+- **Render (perfil `prod`):** por defecto **no** se crea nada. Tenés que agregar en el Web Service de la API la variable de entorno **`DEMO_SEED_ENABLED=true`**, guardar y **volver a desplegar**. En los logs de arranque verás un mensaje que indica si el demo seed está habilitado o no.
+
+En un despliegue institucional real conviene **no** activar el seed (`DEMO_SEED_ENABLED` ausente o `false`).
 
 ## Contraseña (todas las cuentas)
 
