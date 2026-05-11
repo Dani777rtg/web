@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
+import { Link } from 'react-router-dom'
 import api, { setAuthToken } from '../api'
 import { API_BASE, getApiOrigin } from '../config'
 
@@ -119,14 +120,19 @@ export default function Home() {
                 Votos emitidos (público)
               </p>
               <p className="stat-num mt-1">{live[p.id] ?? '—'}</p>
-              <a
-                className="link-quiet mt-5 inline-block"
-                href={`${API_BASE}/public/processes/${p.id}/report.csv`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Descargar CSV agregado →
-              </a>
+              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
+                <Link className="link-quiet" to={`/proceso/${p.id}/resultados`}>
+                  Ver gráficos (barras y torta) →
+                </Link>
+                <a
+                  className="link-quiet"
+                  href={`${API_BASE}/public/processes/${p.id}/report.csv`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Descargar CSV agregado →
+                </a>
+              </div>
             </li>
           ))}
         </ul>

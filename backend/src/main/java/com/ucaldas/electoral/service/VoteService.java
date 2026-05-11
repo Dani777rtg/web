@@ -4,6 +4,7 @@ import com.ucaldas.electoral.domain.*;
 import com.ucaldas.electoral.repo.*;
 import com.ucaldas.electoral.web.dto.VoteDtos;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,9 @@ public class VoteService {
     public void castVote(Long userId, VoteDtos.CastVoteRequest req) {
         AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+        if (user.getRol() == Rol.ADMIN) {
+            throw new AccessDeniedException("Los administradores no pueden emitir voto.");
+        }
         ElectoralProcess proceso = processRepository.findById(req.procesoId())
                 .orElseThrow(() -> new IllegalArgumentException("Proceso no encontrado."));
         Plancha plancha = planchaRepository.findById(req.planchaId())

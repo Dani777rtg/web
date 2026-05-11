@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Link, Navigate } from 'react-router-dom'
 import { AUTH_SESSION_EVENT } from './api'
 import Home from './pages/Home'
@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Vote from './pages/Vote'
 import Admin from './pages/Admin'
+const ProcessResults = lazy(() => import('./pages/ProcessResults'))
 
 export default function App() {
   const [, setSessionEpoch] = useState(0)
@@ -45,9 +46,11 @@ export default function App() {
             )}
             {token && (
               <>
-                <Link to="/vote" className="hover:text-ucal-primary">
-                  Votar
-                </Link>
+                {rol !== 'ADMIN' && (
+                  <Link to="/vote" className="hover:text-ucal-primary">
+                    Votar
+                  </Link>
+                )}
                 {rol === 'ADMIN' && (
                   <Link to="/admin" className="hover:text-ucal-primary">
                     Administración
@@ -74,7 +77,20 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/vote" element={token ? <Vote /> : <Navigate to="/login" />} />
+          <Route
+            path="/vote"
+            element={
+              token ? rol === 'ADMIN' ? <Navigate to="/" replace /> : <Vote /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/proceso/:id/resultados"
+            element={
+              <Suspense fallback={<p className="text-sm text-ucal-muted">Cargando gráficos…</p>}>
+                <ProcessResults />
+              </Suspense>
+            }
+          />
           <Route
             path="/admin"
             element={

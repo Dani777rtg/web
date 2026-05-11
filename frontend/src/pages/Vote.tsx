@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import api, { setAuthToken } from '../api'
 
 type Process = {
@@ -48,6 +49,11 @@ export default function Vote() {
       const ax = ex as { response?: { data?: { error?: string } } }
       setErr(ax.response?.data?.error ?? 'No se pudo votar')
     }
+  }
+
+  const rol = localStorage.getItem('rol')
+  if (rol === 'ADMIN') {
+    return <Navigate to="/" replace />
   }
 
   return (
